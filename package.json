@@ -2,11 +2,16 @@
   "name": "notorizer",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "contracts:compile": "hardhat compile",
+    "contracts:test": "hardhat test",
+    "contracts:deploy:testnet": "hardhat run scripts/deploy-notarize.ts --network rootstockTestnet",
+    "contracts:verify:testnet": "hardhat verify blockscout --network rootstockTestnet"
   },
   "dependencies": {
     "next": "16.2.1",
@@ -14,13 +19,23 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^4.0.6",
+    "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.3",
+    "@nomicfoundation/hardhat-verify": "^3.0.12",
     "@tailwindcss/postcss": "^4",
+    "@types/chai": "^5.2.3",
+    "@types/mocha": "^10.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "chai": "^6.2.2",
+    "dotenv": "^17.3.1",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "ethers": "^6.16.0",
+    "hardhat": "^3.2.0",
+    "mocha": "^11.7.5",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
