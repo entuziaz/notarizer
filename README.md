@@ -4,6 +4,8 @@ A minimal Rootstock Testnet dApp for proof-of-existence timestamping.
 
 The app hashes text or file bytes entirely in the browser, anchors the resulting `bytes32` fingerprint on Rootstock in a single transaction, and lets anyone verify whether that exact hash was recorded first on-chain.
 
+<img width="1403" height="693" alt="Screenshot 2026-03-25 at 23 52 15" src="https://github.com/user-attachments/assets/2e36d1d8-1ef5-40d9-8ac8-207e8d309be5" /> 
+
 ## What Is In This Repo
 
 - an ownerless, non-upgradeable Solidity contract
