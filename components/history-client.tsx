@@ -17,8 +17,14 @@ export function HistoryClient() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
-  const { account, connectWallet, isConnected, isWrongNetwork, switchToRootstock } =
-    useWallet();
+  const {
+    account,
+    connectWallet,
+    hasWallet,
+    isConnected,
+    isWrongNetwork,
+    switchToRootstock,
+  } = useWallet();
 
   async function loadHistory() {
     startTransition(async () => {
@@ -77,6 +83,11 @@ export function HistoryClient() {
           <button
             type="button"
             onClick={() => {
+              if (!hasWallet) {
+                setErrorMessage("No injected wallet was found. Install MetaMask or another EIP-1193 wallet.");
+                return;
+              }
+
               if (isWrongNetwork) {
                 void switchToRootstock();
                 return;
@@ -92,9 +103,28 @@ export function HistoryClient() {
             disabled={isPending}
             className="rounded-full bg-accent px-5 py-3 text-sm font-medium text-[#0b1317] transition-colors hover:bg-accent-strong disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isPending ? "Loading..." : isWrongNetwork ? "Switch network" : !isConnected ? "Connect wallet" : "Load history"}
+            {isPending
+              ? "Loading..."
+              : !hasWallet
+                ? "Install wallet to continue"
+                : isWrongNetwork
+                  ? "Switch to Rootstock Testnet"
+                  : !isConnected
+                    ? "Connect wallet"
+                    : "Load history"}
           </button>
         </div>
+
+        {hasWallet ? null : (
+          <p className="mt-4 rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3 text-sm text-danger">
+            No injected wallet was detected. Install MetaMask or another EIP-1193 wallet to load wallet history.
+          </p>
+        )}
+        {hasWallet && isWrongNetwork ? (
+          <p className="mt-4 rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3 text-sm text-danger">
+            The connected wallet is on the wrong network. Switch to Rootstock Testnet before loading history.
+          </p>
+        ) : null}
 
         {account !== null ? (
           <p className="mt-4 rounded-2xl border border-line bg-surface-strong px-4 py-3 text-sm text-muted">

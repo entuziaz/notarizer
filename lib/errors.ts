@@ -37,6 +37,20 @@ function getNestedMessage(value: object): string | null {
         return "The wallet request was rejected.";
       }
 
+      if (
+        candidate.includes("insufficient funds") ||
+        candidate.includes("INSUFFICIENT_FUNDS")
+      ) {
+        return "The connected wallet does not have enough tRBTC to pay for this transaction.";
+      }
+
+      if (
+        candidate.includes("Unsupported operation") ||
+        candidate.includes("unsupported operation")
+      ) {
+        return "The requested chain data could not be loaded from the current Rootstock data source. Please try again.";
+      }
+
       return candidate;
     }
   }

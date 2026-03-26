@@ -1,6 +1,5 @@
 export const notarizeContractAddress =
-  process.env.NEXT_PUBLIC_NOTARIZE_CONTRACT_ADDRESS ??
-  "0xc2d018fAe55e8A4524cBD93fc8B3A9a25AbBD885";
+  process.env.NEXT_PUBLIC_NOTARIZE_CONTRACT_ADDRESS;
 
 export const rootstockTestnetRpcUrl =
   process.env.NEXT_PUBLIC_ROOTSTOCK_TESTNET_RPC_URL ??

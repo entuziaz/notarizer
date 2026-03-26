@@ -32,6 +32,7 @@ export function VerifyClient({ initialHash }: VerifyClientProps) {
   const hashesMatch = normalizedHash !== null && comparisonHash !== null
     ? normalizedHash === comparisonHash
     : null;
+  const routeHashIsValid = normalizeHash(initialHash) !== null;
 
   async function loadRecord(nextHash: string) {
     setErrorMessage(null);
@@ -41,7 +42,7 @@ export function VerifyClient({ initialHash }: VerifyClientProps) {
 
     if (normalized === null) {
       setRecord(null);
-      setErrorMessage("Enter a valid 32-byte hash before loading the on-chain record.");
+      setErrorMessage("Enter a valid 32-byte keccak256 hash before loading the on-chain record.");
       return;
     }
 
@@ -152,6 +153,12 @@ export function VerifyClient({ initialHash }: VerifyClientProps) {
           ) : null}
         </div>
 
+        {!routeHashIsValid ? (
+          <p className="mt-4 rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3 text-sm text-danger">
+            This verify route is malformed. Use a full 32-byte `0x...` hash, then load the canonical route.
+          </p>
+        ) : null}
+
         {statusMessage !== null ? (
           <p className="mt-4 rounded-2xl border border-success/25 bg-success/8 px-4 py-3 text-sm text-success">
             {statusMessage}
@@ -176,12 +183,14 @@ export function VerifyClient({ initialHash }: VerifyClientProps) {
           </div>
           <span
             className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.24em] ${
-              record === null
+              !routeHashIsValid
+                ? "border border-danger/30 bg-danger/8 text-danger"
+                : record === null
                 ? "border border-danger/30 bg-danger/8 text-danger"
                 : "border border-success/30 bg-success/8 text-success"
             }`}
           >
-            {record === null ? "Not found" : "Anchored"}
+            {!routeHashIsValid ? "Invalid hash" : record === null ? "Not found" : "Anchored"}
           </span>
         </div>
 

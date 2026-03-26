@@ -34,6 +34,13 @@ let readonlyProvider: JsonRpcProvider | null = null;
 const notarizedEventTopic = id(
   "Notarized(bytes32,address,uint256)",
 );
+const resolvedNotarizeContractAddress = (() => {
+  if (notarizeContractAddress === undefined) {
+    throw new Error("NEXT_PUBLIC_NOTARIZE_CONTRACT_ADDRESS is not configured.");
+  }
+
+  return notarizeContractAddress;
+})();
 
 export type NotarizationRecord = {
   hash: string;
@@ -110,11 +117,15 @@ export async function ensureRootstockTestnet(
 }
 
 export function getWritableContract(signer: Signer): Contract {
-  return new Contract(notarizeContractAddress, notarizeAbi, signer);
+  return new Contract(resolvedNotarizeContractAddress, notarizeAbi, signer);
 }
 
 function getReadonlyContract() {
-  return new Contract(notarizeContractAddress, notarizeAbi, getReadonlyProvider());
+  return new Contract(
+    resolvedNotarizeContractAddress,
+    notarizeAbi,
+    getReadonlyProvider(),
+  );
 }
 
 export async function getNotarizationRecord(
@@ -224,7 +235,7 @@ async function getBlockscoutLogs({
     action: "getLogs",
     fromBlock: String(fromBlock),
     toBlock: String(toBlock),
-    address: notarizeContractAddress,
+    address: resolvedNotarizeContractAddress,
     topic0: notarizedEventTopic,
   });
 

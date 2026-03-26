@@ -35,8 +35,14 @@ export function NotarizeClient() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [proofResult, setProofResult] = useState<ProofResult | null>(null);
   const [isPending, startTransition] = useTransition();
-  const { account, connectWallet, isConnected, isWrongNetwork, switchToRootstock } =
-    useWallet();
+  const {
+    account,
+    connectWallet,
+    hasWallet,
+    isConnected,
+    isWrongNetwork,
+    switchToRootstock,
+  } = useWallet();
 
   const verifyLink = useMemo(() => {
     if (proofResult === null) {
@@ -45,6 +51,25 @@ export function NotarizeClient() {
 
     return `/verify/${proofResult.hash}`;
   }, [proofResult]);
+
+  const canAnchor =
+    computedHash !== null && isConnected && !isWrongNetwork && !isPending;
+
+  async function handleCopyVerifyLink() {
+    if (verifyLink === null || typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}${verifyLink}`,
+      );
+      setErrorMessage(null);
+      setStatusMessage("Verify link copied to clipboard.");
+    } catch {
+      setErrorMessage("The verify link could not be copied. You can still open it directly.");
+    }
+  }
 
   async function handleHashGeneration() {
     try {
@@ -204,6 +229,17 @@ export function NotarizeClient() {
           )}
         </div>
 
+        {hasWallet ? null : (
+          <p className="mt-5 rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3 text-sm text-danger">
+            No injected wallet was detected. Install MetaMask or another EIP-1193 wallet to send notarization transactions.
+          </p>
+        )}
+        {hasWallet && isWrongNetwork ? (
+          <p className="mt-5 rounded-2xl border border-danger/30 bg-danger/8 px-4 py-3 text-sm text-danger">
+            The connected wallet is on the wrong network. Switch to Rootstock Testnet before anchoring a hash.
+          </p>
+        ) : null}
+
         <div className="mt-5 flex flex-wrap gap-3">
           <ActionButton onClick={handleHashGeneration}>
             Generate hash
@@ -211,6 +247,11 @@ export function NotarizeClient() {
           <ActionButton
             secondary
             onClick={() => {
+              if (!hasWallet) {
+                setErrorMessage("No injected wallet was found. Install MetaMask or another EIP-1193 wallet.");
+                return;
+              }
+
               void (isWrongNetwork ? switchToRootstock() : connectWallet());
             }}
           >
@@ -219,9 +260,19 @@ export function NotarizeClient() {
           <ActionButton
             accent
             onClick={handleNotarize}
-            disabled={isPending || computedHash === null}
+            disabled={!canAnchor}
           >
-            {isPending ? "Submitting..." : "Anchor on Rootstock"}
+            {isPending
+              ? "Submitting..."
+              : computedHash === null
+                ? "Generate hash first"
+                : !hasWallet
+                  ? "Install wallet to continue"
+                  : isWrongNetwork
+                    ? "Switch to Rootstock Testnet"
+                    : !isConnected
+                      ? "Connect wallet to anchor"
+                      : "Anchor on Rootstock"}
           </ActionButton>
         </div>
       </section>
@@ -263,14 +314,27 @@ export function NotarizeClient() {
                 On-chain anchor confirmed
               </h2>
             </div>
-            {verifyLink !== null ? (
-              <Link
-                href={verifyLink}
-                className="rounded-full border border-accent/50 px-4 py-2 text-sm text-foreground transition-colors hover:bg-accent/10"
-              >
-                Open verify link
-              </Link>
-            ) : null}
+            <div className="flex flex-wrap gap-3">
+              {verifyLink !== null ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    void handleCopyVerifyLink();
+                  }}
+                  className="rounded-full border border-line px-4 py-2 text-sm text-foreground transition-colors hover:border-accent/40 hover:bg-accent/10"
+                >
+                  Copy verify link
+                </button>
+              ) : null}
+              {verifyLink !== null ? (
+                <Link
+                  href={verifyLink}
+                  className="rounded-full border border-accent/50 px-4 py-2 text-sm text-foreground transition-colors hover:bg-accent/10"
+                >
+                  Open verify link
+                </Link>
+              ) : null}
+            </div>
           </div>
 
           <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-2">
